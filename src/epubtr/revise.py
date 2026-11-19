@@ -135,3 +135,24 @@ def revise(cfg: LLMConfig, blocks: list[Block], drafts: dict[str, str],
         out[uid] = text
     stats.revised += len(out)
     return out
+
+
+VERIFY_SYSTEM = """你是日译中校对。给你日文原文、初稿译文、修订译文，判断这次修订是否可信。
+
+只有同时满足以下条件才判 keep：
+1. 修订确实修正了初稿的问题；
+2. 没有引入新错误：误译、错字、生造词、把正确的地方改错、把含糊处说死。
+
+只输出 JSON：{"decision":"keep" 或 "revert","reason":"一句话"}"""
+
+
+def verify_change(cfg, source: str, draft: str, revised: str) -> tuple[bool, str]:
+    """LLM 复核一次修订是否可信。"""
+    prompt = f"【原文】\n{source}\n\n【初稿】\n{draft}\n\n【修订】\n{revised}"
+    try:
+        r = chat(cfg, VERIFY_SYSTEM, prompt, temperature=0.0,
+                 max_tokens=200, json_mode=True)
+        d = json.loads(r.text)
+        return d.get("decision") == "keep", str(d.get("reason", ""))[:80]
+    except Exception:  # noqa: BLE001
+        return True, "复核失败，保留修订"

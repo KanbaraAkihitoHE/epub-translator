@@ -20,6 +20,7 @@ from epubtr.glossary import load as gl_load, to_prompt  # noqa: E402
 from epubtr.ir import extract_doc                   # noqa: E402
 from epubtr.llm import load_config                  # noqa: E402
 from epubtr.punct import check_text                 # noqa: E402
+from epubtr.textnorm import looks_japanese           # noqa: E402
 from epubtr.render import MarkerError, tokenize, validate  # noqa: E402
 from epubtr.translate import translate_batch        # noqa: E402
 
@@ -80,7 +81,7 @@ def main(argv: list[str]) -> int:
                 text = new
             bad = gl_check(gl, b.source, text)
             kana = len(KANA.findall(text))
-            if bad or kana > 3:
+            if bad or kana > 3 or looks_japanese(text):
                 retrans += 1
                 try:
                     got = translate_batch(cfg, book.title, book.creator, [b],
@@ -89,7 +90,8 @@ def main(argv: list[str]) -> int:
                 except Exception:  # noqa: BLE001
                     cand = None
                 if cand and not gl_check(gl, b.source, cand) \
-                        and len(KANA.findall(cand)) <= kana:
+                        and len(KANA.findall(cand)) <= kana \
+                        and not looks_japanese(cand):
                     text = cand
                     fixed_ok += 1
             units[b.uid] = text

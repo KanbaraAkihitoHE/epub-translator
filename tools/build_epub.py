@@ -30,16 +30,29 @@ def main(argv: list[str]) -> int:
         print(f"没有译文目录 {work}")
         return 1
     translations: dict[str, dict[str, str]] = {}
+    drafts: dict[str, dict[str, str]] = {}
     hashes: dict[str, dict[str, str]] = {}
     rev = work / "rev"
     for f in sorted(work.glob("*.json")):
         if f.name == "titles.json":
             continue
+        draft = json.loads(f.read_text(encoding="utf-8"))
+        drafts[draft["href"]] = draft.get("units", {})
         use = rev / f.name if (rev / f.name).exists() else f
         data = json.loads(use.read_text(encoding="utf-8"))
         translations[data["href"]] = data["units"]
         if data.get("src_hash"):
             hashes[data["href"]] = data["src_hash"]
+
+    # 构建前清理：回退可疑修订、统一引号、修正敬称写法
+    from epubtr.cleanup import clean, corpus_counts
+    counts = corpus_counts([t for u in translations.values() for t in u.values()])
+    clean_stats = {"rolled_back": 0, "quotes": 0, "honorific": 0, "readings": 0}
+    for href, units in list(translations.items()):
+        cleaned, st = clean(drafts.get(href, {}), units, {}, counts)
+        translations[href] = cleaned
+        for k in clean_stats:
+            clean_stats[k] += st[k]
     titles: dict[str, str] = {}
     tpath = work / "titles.json"
     if tpath.exists():
@@ -73,6 +86,9 @@ def main(argv: list[str]) -> int:
     print(f"  已翻 {stats['docs']} 篇 / {stats['blocks']} 段")
     print(f"  字体子集 {stats['font_bytes'] / 1024:.0f} KB")
     print(f"  标题替换 {len(titles)} 条 · 人物页注记 {stats['names_annotated']} 条")
+    print(f"  清理：回退可疑修订 {clean_stats['rolled_back']} 段 · "
+          f"引号统一 {clean_stats['quotes']} 段 · 敬称修正 {clean_stats['honorific']} 段 · "
+          f"读音清理 {clean_stats['readings']} 段")
     stale = stats.get("stale", [])
     print(f"  原文变更（待重译）{len(stale)} 段")
     if stale:

@@ -111,6 +111,7 @@ python tools/check_numbers.py    assets/samples/xxx.epub   # 数字/日期（噪
 python tools/polish.py           assets/samples/xxx.epub   # 中文润色（按审校标记）
 python tools/polish.py           assets/samples/xxx.epub --long  # 额外强化长段落语体
 python tools/autofix.py          assets/samples/xxx.epub   # 自动重译术语/假名异常段
+python tools/audit_revisions.py  assets/samples/xxx.epub --apply  # 复核已有修订，不可信的回退初稿
 python tools/verify_epub.py out/xxx.zh.epub assets/samples/xxx.epub  # 成品结构校验
 ```
 

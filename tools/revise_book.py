@@ -93,6 +93,12 @@ def main(argv: list[str]) -> int:
                 b = next(x for x in group if x.uid == uid)
                 if len(gl_check(gl, b.source, text)) > len(gl_check(gl, b.source, units.get(uid, ""))):
                     continue
+                ok, why = verify_change(cfg, b.source, units.get(uid, ""), text)
+                if not ok:
+                    with LOCK:
+                        total.rejected += 1
+                    print(f"  [revert] {uid}: {why}")
+                    continue
                 units[uid] = text
         save_json(dest, {
             "href": item.full, "units": units, "issues": doc_issues,
