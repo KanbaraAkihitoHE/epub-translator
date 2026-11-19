@@ -129,6 +129,15 @@ store.py    原子落盘
 - [中间表示规范](docs/ir.md) —— 无损回写怎么实现
 - [操作手册](docs/manual.md) —— 从放书到打包
 
+## 贡献
+
+1. 结构保真优先：任何改动都要让 `verify_epub.py` 的结构同构保持 0 差异；
+2. 术语只有一个权威：新增产出文字的链路必须经过 `NameResolver`；
+3. 失败可恢复：写文件用 `store.save_json`，长任务要能断点续跑；
+4. 有测试：`python -m unittest discover -s tests` 必须通过。
+
+提交前自查 `git status --short`，确认没有把书籍、译文或 API key 带进来。
+
 ## 许可
 
 MIT，见 [LICENSE](LICENSE)。仓库不含任何书籍文本、译文或评测数据。
