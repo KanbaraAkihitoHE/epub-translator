@@ -108,6 +108,8 @@ python tools/revise_book.py assets/samples/xxx.epub
 python tools/qa_report.py        assets/samples/xxx.epub   # 假名残留、长度异常
 python tools/consistency.py      assets/samples/xxx.epub   # 跨章人名/术语一致性
 python tools/check_numbers.py    assets/samples/xxx.epub   # 数字/日期（噪声大）
+python tools/polish.py           assets/samples/xxx.epub   # 中文润色
+python tools/autofix.py          assets/samples/xxx.epub   # 自动重译术语/假名异常段
 python tools/verify_epub.py out/xxx.zh.epub assets/samples/xxx.epub  # 成品结构校验
 ```
 
