@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2026 epub-translator contributors
+Copyright (c) 2026 KanbaraAkihitoHE
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,11 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-说明：
-
-- 本仓库只包含代码，不包含任何书籍文本、译文、术语表或评测数据。
-- 内嵌字体由使用者自行提供（默认读取系统楷体），仓库不附带字体文件。
-- 使用者需自行确保对所处理书籍拥有合法使用权；本项目不提供 DRM 绕过。
