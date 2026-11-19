@@ -6,7 +6,7 @@ import re
 from collections import Counter
 
 from .textnorm import (CJK, fix_honorific, kana_count, looks_japanese,
-                       suspicious_change, unify_quotes)
+                       simplify_variants, suspicious_change, unify_quotes)
 
 READING = re.compile(r"[（(][ぁ-んァ-ヶ・ー\s]{1,24}[）)]")
 
@@ -61,6 +61,11 @@ def clean(drafts: dict[str, str], revs: dict[str, str], sources: dict[str, str],
         if fixed != text:
             stats["honorific"] += 1
         text = fixed
+        fixed2 = simplify_variants(text)
+        if fixed2 != text:
+            stats.setdefault("variants", 0)
+            stats["variants"] += 1
+        text = fixed2
         fixed = strip_reading(text)
         if fixed != text:
             stats["readings"] += 1
