@@ -125,10 +125,9 @@ store.py    原子落盘
 
 ## 文档
 
-- [设计文档](docs/design.md)
-- [操作手册](docs/manual.md)
-- [实现状态](docs/status.md)
-- [后续路线](docs/roadmap.md)
+- [设计文档](docs/design.md) —— 分层架构与关键决策
+- [中间表示规范](docs/ir.md) —— 无损回写怎么实现
+- [操作手册](docs/manual.md) —— 从放书到打包
 
 ## 许可
 

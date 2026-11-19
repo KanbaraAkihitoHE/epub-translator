@@ -1,5 +1,6 @@
 # 密钥与本地产物
 config/local.json
+notes/
 config/*.local.json
 out/
 work/
