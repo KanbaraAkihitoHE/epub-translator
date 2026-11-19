@@ -1,0 +1,27 @@
+# 密钥与本地产物
+config/local.json
+config/*.local.json
+out/
+work/
+cache/
+reports/
+!reports/README.md
+*.log
+
+# 版权相关：不进仓库
+assets/samples/*.epub
+assets/golden/**
+kb/**
+eval/golden.jsonl
+eval/fresh-*.jsonl
+eval/results-*.json
+eval/baseline-fresh.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# 编辑器
+.vscode/
+.idea/
