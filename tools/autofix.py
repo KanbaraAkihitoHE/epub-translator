@@ -21,6 +21,7 @@ from epubtr.ir import extract_doc                   # noqa: E402
 from epubtr.llm import load_config                  # noqa: E402
 from epubtr.punct import check_text                 # noqa: E402
 from epubtr.textnorm import looks_japanese           # noqa: E402
+from epubtr.allowed import load as allow_load          # noqa: E402
 from epubtr.render import MarkerError, tokenize, validate  # noqa: E402
 from epubtr.translate import translate_batch        # noqa: E402
 
@@ -69,6 +70,7 @@ def main(argv: list[str]) -> int:
         item = docs.get(href)
         if item is None:
             continue
+        allowed = allow_load(rev)
         doc = extract_doc(href, read_doc(z, item))
         units = data["units"]
         for b in doc.blocks:
@@ -81,6 +83,8 @@ def main(argv: list[str]) -> int:
                 text = new
             bad = gl_check(gl, b.source, text)
             kana = len(KANA.findall(text))
+            if f"{href}:{b.uid}" in allowed:
+                continue
             if bad or kana > 3 or looks_japanese(text):
                 retrans += 1
                 try:

@@ -51,6 +51,7 @@ def main(argv: list[str]) -> int:
          lambda: (root / "work" / name / "titles.json").exists()),
         ("翻译", ["tools/translate_book.py", epub], None),
         ("修订", ["tools/revise_book.py", epub], None),
+        ("修订复核", ["tools/audit_revisions.py", epub, "--apply"], None),
         ("润色", ["tools/polish.py", epub], None),
         ("自动修复", ["tools/autofix.py", epub], None),
         ("打包", ["tools/build_epub.py", epub], None),
