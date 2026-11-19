@@ -117,3 +117,16 @@ VARIANT = {
 
 def simplify_variants(text: str) -> str:
     return "".join(VARIANT.get(c, c) for c in text)
+
+
+def kana_outside_quotes(text: str) -> int:
+    """引号内（字谜、原名）的假名不算未译。"""
+    depth, n = 0, 0
+    for ch in text:
+        if ch in ("「", "『"):
+            depth += 1
+        elif ch in ("」", "』"):
+            depth = max(0, depth - 1)
+        elif depth == 0 and "\u3040" <= ch <= "\u30ff":
+            n += 1
+    return n

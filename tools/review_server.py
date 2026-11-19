@@ -26,7 +26,8 @@ from epubtr.package import plain                  # noqa: E402
 from epubtr.paths import slug as make_slug         # noqa: E402
 from epubtr.store import save_json                 # noqa: E402
 from epubtr.punct import check_text
-from epubtr.textnorm import looks_japanese               # noqa: E402
+from epubtr.textnorm import kana_outside_quotes, looks_japanese, simplify_variants
+from epubtr.cleanup import strip_reading               # noqa: E402
 
 KANA = re.compile(r"[\u3040-\u30ff]")
 CACHE: dict[str, dict] = {}
@@ -116,11 +117,12 @@ def issues(s: str) -> list[dict]:
                     note = f"原文有「{ja}」，译文应出现「{zz}」，但没找到"
                 out.append({"type": "术语", "doc": href, "uid": blk.uid,
                             "note": note})
-            if looks_japanese(zh):
+            zh_view = simplify_variants(strip_reading(zh))
+            if looks_japanese(zh_view) and kana_outside_quotes(zh_view) >= 2:
                 out.append({"type": "未译", "doc": href, "uid": blk.uid,
                             "note": "这段看起来仍是日文，可能翻译失败后回退成了原文"})
-            hits = KANA.findall(zh)
-            if len(hits) > 3:
+            hits = KANA.findall(zh_view)
+            if kana_outside_quotes(zh_view) > 3:
                 sample = "".join(sorted(set(hits)))[:12]
                 out.append({"type": "假名", "doc": href, "uid": blk.uid,
                             "note": f"译文里有 {len(hits)} 个假名（{sample}…），"
