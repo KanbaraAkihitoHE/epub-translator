@@ -30,6 +30,15 @@ SYSTEM = """你是中文编辑，负责润色日本小说的译文。
 """
 
 
+LONG_SYSTEM = """你是中文编辑，正在润色日本小说的长段落译文。
+
+只改语体与节奏：去翻译腔、调整句子长短、让叙述更自然。
+不得增删信息或补充原文没有的内容；不得把原文含糊处说清楚；
+不得改人名、术语、数字；保留内联标记。
+输出 JSON：{"units":[{"id":"...","text":"..."}]}
+"""
+
+
 def slug(s: str) -> str:
     return "".join(c if c.isalnum() or c in "-_" else "_" for c in s)[:40]
 
@@ -43,7 +52,9 @@ def main(argv: list[str]) -> int:
     work = Path("work") / name
     rev = work / "rev"
     cfg = load_config()
-    only = int(argv[2]) if len(argv) > 2 else None
+    args = [a for a in argv[2:] if not a.startswith("--")]
+    only = int(args[0]) if args else None
+    long_mode = "--long" in argv
 
     total, changed = 0, 0
     for idx, item in enumerate(book.docs):
@@ -55,11 +66,16 @@ def main(argv: list[str]) -> int:
         data = json.loads(f.read_text(encoding="utf-8"))
         units = data["units"]
         issues = data.get("issues", [])
-        targets = {i["id"] for i in issues if i.get("type") in ("style", "fluency")}
-        targets &= set(units)
+        doc = extract_doc(item.full, read_doc(z, item))
+        if long_mode:
+            targets = {b.uid for b in doc.blocks
+                       if len(b.source) > 130 and units.get(b.uid)}
+        else:
+            targets = {i["id"] for i in issues
+                       if i.get("type") in ("style", "fluency")}
+            targets &= set(units)
         if not targets:
             continue
-        doc = extract_doc(item.full, read_doc(z, item))
         blocks = [b for b in doc.blocks if b.uid in targets]
         print(f"{item.full}: 待润色 {len(blocks)} 段", flush=True)
         for i in range(0, len(blocks), 6):
@@ -67,8 +83,9 @@ def main(argv: list[str]) -> int:
             payload = json.dumps({"units": [
                 {"id": b.uid, "ja": b.source, "zh": units[b.uid]} for b in group]},
                 ensure_ascii=False, indent=1)
+            system = LONG_SYSTEM if long_mode else SYSTEM
             try:
-                r = chat(cfg, SYSTEM, payload, temperature=0.3, max_tokens=4096,
+                r = chat(cfg, system, payload, temperature=0.3, max_tokens=4096,
                          json_mode=True)
                 out = json.loads(r.text).get("units", [])
             except Exception as e:  # noqa: BLE001
