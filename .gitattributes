@@ -1,0 +1,9 @@
+# 统一换行，避免 Windows 检出后整仓 diff
+* text=auto eol=lf
+
+*.epub binary
+*.png binary
+*.jpg binary
+*.ttf binary
+*.otf binary
+*.woff2 binary
