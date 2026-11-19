@@ -57,9 +57,18 @@ python tools/pipeline.py "assets/samples/你的书.epub"
 | `python tools/polish.py <epub>` | 中文润色（只改表达） |
 | `python tools/build_epub.py <epub>` | 重新打包 |
 | `python tools/verify_epub.py <out> <src>` | 结构同构校验 |
-| `python tools/review_server.py` | 审校界面（http://127.0.0.1:8765） |
+| `python tools/review_server.py` | 启动本地审校服务（仅本机，浏览器打开 http://127.0.0.1:8765） |
 
 ## 审校界面
+
+本地跑，只在你的机器上：
+
+```bash
+python tools/review_server.py
+# 然后浏览器打开 http://127.0.0.1:8765
+```
+
+`127.0.0.1` 是本机地址，别人无法访问；每个人需要自己启动这个服务。
 
 ```
 问题清单（标点 / 术语 / 假名 / 待重译） → 点开段落
