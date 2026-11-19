@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: 安装依赖
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: 单元测试
+        run: python -m unittest discover -s tests -v
+      - name: 语法检查
+        run: python -m compileall -q src tools
+      - name: 结构保真不变量
+        run: |
+          python - <<'PY'
+          # 不依赖任何书籍：构造一个带注音/内联/脚注的页面，
+          # 断言恒等往返逐字节一致、结构标签不变。
+          import sys
+          sys.path.insert(0, "src")
+          from epubtr.scan import scan, canonical_tags
+          from epubtr.ir import extract_doc
+          from epubtr.render import rewrite
+
+          page = (
+              '<?xml version="1.0" encoding="utf-8"?>'
+              '<html xmlns:epub="http://www.idpf.org/2007/ops"><body>'
+              '<h1>第一章</h1>'
+              '<p class="x">彼は<em>窓</em>の外を見た。</p>'
+              '<p><ruby>漢字<rt>かんじ</rt></ruby>と<a epub:type="noteref" href="#n1">1</a>。</p>'
+              '<aside epub:type="footnote" id="n1"><p>注</p></aside>'
+              '</body></html>'
+          )
+          doc = extract_doc("t.xhtml", page)
+          out = rewrite(doc, {b.uid: b.source for b in doc.blocks})
+          assert out == page, "恒等往返必须逐字节一致"
+          out2 = rewrite(doc, {b.uid: "译文" + b.source for b in doc.blocks})
+          assert canonical_tags(out2) == canonical_tags(page), "结构必须保持不变"
+          print("结构保真不变量通过")
+          PY

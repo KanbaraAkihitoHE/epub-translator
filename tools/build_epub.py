@@ -50,11 +50,21 @@ def main(argv: list[str]) -> int:
         names = len(json.loads(gl_path.read_text(encoding="utf-8"))
                     .get("characters", []))
     cfg = json.loads(Path("config/local.json").read_text(encoding="utf-8"))
-    fp = cfg.get("font", {}).get("path", r"C:\Windows\Fonts\simkai.ttf")
-    font_path = Path(fp)
-    if not font_path.exists():
-        print(f"[warn] 字体不存在：{fp}，改为不内嵌")
-        font_path = None
+
+    # 字体解析顺序：配置 → assets/fonts/ → 系统楷体 → 不内嵌
+    def resolve_font() -> Path | None:
+        cand = [Path(cfg.get("font", {}).get("path", ""))]
+        cand += sorted(Path("assets/fonts").glob("*.tt[fc]")) \
+            + sorted(Path("assets/fonts").glob("*.otf"))
+        cand.append(Path(r"C:\Windows\Fonts\simkai.ttf"))
+        for p in cand:
+            if p and p.exists():
+                return p
+        return None
+
+    font_path = resolve_font()
+    if font_path is None:
+        print("[warn] 没找到可用字体，改为不内嵌（可用 assets/fonts/ 放一个开源楷体）")
     out = Path("out") / (src.stem.split(" (")[0] + ".zh.epub")
     stats = build_epub(src, translations, out, font_path=font_path, titles=titles,
                        normalize_size=cfg.get("font", {}).get("normalize_size", True),

@@ -114,7 +114,7 @@ store.py    原子落盘
 
 - 任何 OpenAI 兼容接口都可以（DeepSeek、vLLM、Ollama）；
 - 并发用环境变量：`EPUBTR_WORKERS=5`（默认 3）；
-- 字体可选，不填则不内嵌。
+- 字体可选：把 `.ttf/.otf` 放进 `assets/fonts/` 即自动内嵌（推荐开源楷体，如霞鹜文楷）；不填则不内嵌。
 
 ## 已知限制
 
