@@ -69,7 +69,9 @@ def load_book(s: str) -> dict:
         rp = work / "rev" / f.name
         rev[data["href"]] = json.loads(rp.read_text(encoding="utf-8"))["units"] \
             if rp.exists() else data["units"]
-    CACHE[s] = {"book": book, "z": z, "kb": kb, "bible": bible,
+    titles = json.loads((work / "titles.json").read_text(encoding="utf-8")) \
+        if (work / "titles.json").exists() else {}
+    CACHE[s] = {"book": book, "z": z, "kb": kb, "bible": bible, "titles": titles,
                 "gl": glossary, "draft": draft, "rev": rev,
                 "names": NameResolver(glossary), "info": info,
                 "docs": {it.full: it for it in book.docs}}
@@ -132,6 +134,12 @@ def issues(s: str) -> list[dict]:
     if stale.exists():
         for item in json.loads(stale.read_text(encoding="utf-8"))[:50]:
             href, uid = item.rsplit(":", 1)
+            blk = next((x for x in doc_blocks(b, href) if x.uid == uid), None)
+            # 标题类段落会被 titles.json 覆盖，不需要重译
+            if blk is not None and (plain(blk.source) in (b.get("titles") or {})):
+                continue
+            if blk is not None and blk.kind == "heading":
+                continue
             out.append({"type": "待重译", "doc": href, "uid": uid,
                         "note": "原文在 IR 变更后已不同，旧译文不可用"})
     return out[:200]
