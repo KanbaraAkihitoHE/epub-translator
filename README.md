@@ -68,6 +68,24 @@ python tools/review_server.py
 
 只监听本机。界面里可以按问题清单逐条修改，改完点"重新打包"。
 
+### 图形界面
+
+```bash
+tools/gui.py            # 或双击 启动.bat
+```
+
+三个页签：整本翻译、片段文本、审校服务。
+
+### 只翻一节
+
+没有 EPUB 也可以，纯文本直接翻：
+
+```bash
+python tools/translate_text.py section.txt --title "第三章" --glossary 书名
+```
+
+输出 `out/section.zh.txt`；加 `--epub` 同时生成 EPUB。
+
 ### 分步执行
 
 ```bash

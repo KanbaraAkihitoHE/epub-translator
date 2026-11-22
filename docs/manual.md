@@ -15,6 +15,8 @@
 
 ```bash
 python tools/pipeline.py assets/samples/xxx.epub
+python tools/gui.py                                   # 图形界面
+python tools/translate_text.py 片段.txt --title "第三章" --glossary 失恋  # 只翻一段
 ```
 
 已完成的步骤会自动跳过；哪一步崩了，修好后重新执行同一条命令即可续上。
