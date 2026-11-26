@@ -51,8 +51,19 @@ def parse_text(raw: str) -> tuple[str, list[tuple[str, str]]]:
     return title, blocks
 
 
+VERTICAL_CSS = """html, body {
+  writing-mode: vertical-rl;
+  -epub-writing-mode: vertical-rl;
+  -webkit-writing-mode: vertical-rl;
+}
+p { margin: 0 0.35em; text-indent: 1em; line-height: 1.7; }
+h1, h2 { margin: 0 0.8em; font-weight: normal; }
+"""
+
+
 def build_txt_epub(raw: str, out: Path, *, title: str = "",
-                   author: str = "", lang: str = "ja") -> tuple[Path, str]:
+                   author: str = "", lang: str = "ja",
+                   vertical: bool = False) -> tuple[Path, str]:
     """生成最小 EPUB。返回 (路径, 书名)。"""
     parsed_title, blocks = parse_text(raw)
     title = title or parsed_title or "未命名片段"
@@ -69,12 +80,17 @@ def build_txt_epub(raw: str, out: Path, *, title: str = "",
             body.append("<hr/>")
         else:
             body.append(f"<p>{html.escape(text)}</p>")
+    css_link = ('<link rel="stylesheet" type="text/css" href="style.css"/>'
+                if vertical else "")
     chapter = ('<?xml version="1.0" encoding="utf-8"?>\n'
                '<html xmlns="http://www.w3.org/1999/xhtml" '
                'xmlns:epub="http://www.idpf.org/2007/ops" lang="ja">'
-               f"<head><title>{html.escape(title)}</title></head><body>\n"
+               f"<head><title>{html.escape(title)}</title>{css_link}</head><body>\n"
                + "\n".join(body) + "\n</body></html>")
 
+    direction = "rtl" if vertical else "ltr"
+    css_item = ('\n    <item id="css" href="style.css" media-type="text/css"/>'
+                if vertical else "")
     opf = f"""<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="uid">
   <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
@@ -82,12 +98,13 @@ def build_txt_epub(raw: str, out: Path, *, title: str = "",
     <dc:title>{html.escape(title)}</dc:title>
     <dc:creator>{html.escape(author or "佚名")}</dc:creator>
     <dc:language>{lang}</dc:language>
+    <meta property="dcterms:modified">2026-01-01T00:00:00Z</meta>
   </metadata>
   <manifest>
     <item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>
-    <item id="ch" href="chapter.xhtml" media-type="application/xhtml+xml"/>
+    <item id="ch" href="chapter.xhtml" media-type="application/xhtml+xml"/>{css_item}
   </manifest>
-  <spine>
+  <spine page-progression-direction="{direction}">
     <itemref idref="ch"/>
   </spine>
 </package>
@@ -107,4 +124,6 @@ def build_txt_epub(raw: str, out: Path, *, title: str = "",
         z.writestr("OEBPS/content.opf", opf)
         z.writestr("OEBPS/nav.xhtml", nav)
         z.writestr("OEBPS/chapter.xhtml", chapter)
+        if vertical:
+            z.writestr("OEBPS/style.css", VERTICAL_CSS)
     return out, title

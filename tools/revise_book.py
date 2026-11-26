@@ -18,7 +18,8 @@ from epubtr.epub import open_book, read_doc       # noqa: E402
 from epubtr.glossary import check as gl_check, load as gl_load, to_prompt  # noqa: E402
 from epubtr.ir import extract_doc                  # noqa: E402
 from epubtr.llm import load_config                # noqa: E402
-from epubtr.revise import ReviseStats, critique, revise, should_revise  # noqa: E402
+from epubtr.revise import (ReviseStats, critique, revise, should_revise,  # noqa: E402
+                            verify_change)
 
 
 def slug(s: str) -> str:
