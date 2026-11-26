@@ -110,6 +110,8 @@ def main(argv: list[str]) -> int:
                         "-l", "jpn_vert", "--psm", psm],
                        capture_output=True)
         text = clean(base.with_suffix(".txt").read_text(encoding="utf-8"))
+        if re.search(r"[「『]\s*[」』]", text):
+            print(f"  [warn] {p.name} 出现空引号，可能有数字/字符未识别")
         done[p.name] = text
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(json.dumps(done, ensure_ascii=False, indent=1), encoding="utf-8")
