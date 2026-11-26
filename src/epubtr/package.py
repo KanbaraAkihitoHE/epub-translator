@@ -264,9 +264,9 @@ def build_epub(
             if name in new_docs:
                 html = new_docs[name]
                 if font_bytes:
+                    css_path = posixpath.join(opf_dir, FONT_DIR, CSS_FILE).lstrip("/")
                     css_href = posixpath.relpath(
-                        f"{FONT_DIR}/{CSS_FILE}",
-                        posixpath.dirname(name) or ".")
+                        css_path, posixpath.dirname(name) or ".")
                     html = _inject_head(
                         html, f'<link rel="stylesheet" type="text/css" href="{css_href}"/>')
                 elif layout_css:
